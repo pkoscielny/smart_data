@@ -1,7 +1,4 @@
-import pytest
-
 from smart_data import include
-
 
 expected = {
     'foo': 1.1,
@@ -17,7 +14,7 @@ def test_is_equal():
         'bar': [42, {'baz': 2}],
         'zoo': None,
         'zar': [[1, 3], [5, 8]],
-        'zaz': 2.2, # additional key will be ignored
+        'zaz': 2.2,  # additional key will be ignored
     }
     assert include(got, expected) == []
 
@@ -71,7 +68,6 @@ def test_different_values():
     assert include(got, expected) == ['/bar/1/baz/<43 vs 2>', '/zar/0/0/<10 vs 1>', '/zar/1/0/<50 vs 5>']
 
 
-
 # Try to test structures with objects:
 class Foo:
     def __init__(self, bar):
@@ -81,39 +77,36 @@ class Foo:
         return str(self.bar)
 
     def __eq__(self, other):
-        if (self.bar == other.bar):
+        if self.bar == other.bar:
             return True
         else:
             return False
 
 
 def test_equal_objects():
-
-    expected = {
+    expected_with_obj = {
         'foo': Foo(1),
         'bar': []
     }
 
-    got = {
+    got_with_obj = {
         'foo': Foo(1),
         'bar': []
     }
-    assert include(got, expected) == []
+    assert include(got_with_obj, expected_with_obj) == []
 
 
 def test_different_objects():
-
-    expected = {
+    expected_with_obj = {
         'foo': Foo(1),
         'bar': []
     }
 
-    got = {
+    got_with_obj = {
         'foo': Foo(2),
         'bar': []
     }
-    assert include(got, expected) == ['/foo/<2 vs 1>']
-
+    assert include(got_with_obj, expected_with_obj) == ['/foo/<2 vs 1>']
 
 
 # pytest -vv

@@ -1,14 +1,12 @@
 
-
-#TODO: add optional parameter: find_in_list (True, False; default False).
-#TODO: think about yield version instead of recursive version of 'include'.
+# TODO: add optional parameter: find_in_list (True, False; default False).
+# TODO: think about yield version instead of recursive version of 'include'.
 def include(got, expected, path=''):
 
-    def _eq_types(got, expected, type):
-        if isinstance(got, type) and isinstance(expected, type):
+    def _eq_types(got_struct, expected_struct, struct_type):
+        if isinstance(got_struct, struct_type) and isinstance(expected_struct, struct_type):
             return True
         return False
-
 
     diff_paths = []
 
@@ -48,4 +46,3 @@ def include(got, expected, path=''):
         diff_paths.append(f'{path}/<type diff>')
 
     return diff_paths
-
