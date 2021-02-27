@@ -8,6 +8,12 @@ This package help you to write this kind of code easier.
 
 No package dependecy.
 
+## Installation
+
+```
+pip install smart_data
+```
+
 ## Functions
 
 ### list_diff = include(got, expected) 
