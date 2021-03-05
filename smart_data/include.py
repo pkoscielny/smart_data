@@ -1,3 +1,8 @@
+from re import compile as re_compile
+
+# Taken from re.py (Python 3.6).
+_pattern_type = type(re_compile("", 0))
+
 
 # TODO: add optional parameter: find_in_list (True, False; default False).
 # TODO: think about yield version instead of recursive version of 'include'.
@@ -36,6 +41,12 @@ def include(got, expected, path=''):
 
         # or find each got element in expected list (no matter len comparsion and comparsion items one by one).
         # If some element doesn't exist in expected list then add it to diff_paths.
+
+    # Reqular expression check expectations.
+    elif isinstance(expected, _pattern_type):
+        got_str = str(got)
+        if not expected.search(got_str):
+            diff_paths.append(f"{path}/<{got} not matched to regex {expected}>")
 
     # Simple types:
     elif type(got) == type(expected):

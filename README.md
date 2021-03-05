@@ -25,11 +25,16 @@ pip install smart_data
 Try to check if 'expected' structure includes 'got' structure. Any additional keys from 'got' will be igroned.
 This situation can be expected if you don't want to check some parts of complex structure (e.g. in tests).
 
+The structures should contain dictionaries, lists, objects, simple types or any comparable structures (`__str__` and `__eq__` implementation).
+Additionally 'expected' can be or can contains compiled regular expression (re package) to check e.g. if you don't want mocking datetime objects.
 
 ## Example of usage
 
 So let's try test some endpoint:
 ```
+import re
+re_datetime = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$")
+
 def test_add_new(self, client):
     with client:
         res = client.post(
@@ -49,13 +54,14 @@ def test_add_new(self, client):
         )
         assert 201 == res.status_code
         res_json = res.get_json()
+        
         assert res_json['data']['type'] == 'air_state'
         assert res_json['data']['id'] == '1'
         assert res_json['data']['attributes']['temperature'] == '20.1'
         assert res_json['data']['attributes']['humidity'] == '51.2'
         assert res_json['data']['attributes']['location'] == 'kitchen'
         assert res_json['data']['attributes']['device'] == 'dev1_esp'
-        assert 'created' in res_json['data']['attributes'].keys()
+        assert re_datetime.search(res_json['data']['attributes']['created'])
 
 ```
 You need write buch of asserts for many items in result structure. Many lines of code. If bigger structure then more code.
@@ -63,33 +69,32 @@ You need write buch of asserts for many items in result structure. Many lines of
 Now you can write it in another way using smart_data package:
 ```
 from smart_data import include
+from re import compile
 
 def test_add_new(self, client):
 
     payload = {
-        'data': {
-            'type': 'air_state',
-            'attributes': {
-                'temperature': 20.1,
-                'humidity': 51.2,
-                'location': 'kitchen',
-                'device': 'dev1_esp',
-            },
+        'type': 'air_state',
+        'attributes': {
+            'temperature': 20.1,
+            'humidity': 51.2,
+            'location': 'kitchen',
+            'device': 'dev1_esp',
         },
     }
 
     with client:
         res = client.post(
             '/air_state',
-            json = payload,
+            json = { 'data': payload },
             content_type = 'application/vnd.api+json',
         )
         assert 201 == res.status_code
 
+        payload['attributes']['id'] = 1
+        payload['attributes']['created'] = compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$")
         res_json = res.get_json()
-        assert include(got=res_json, expected=payload) == []
-        assert res_json['data']['id'] == '1'
-        assert 'created' in res_json['data']['attributes'].keys()
+        assert include(got=res_json['data'], expected=payload) == []
 ```
 This is simple example with really small amount of data to test. For more complex structure the benefit is higher. 
 

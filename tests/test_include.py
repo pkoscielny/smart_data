@@ -1,4 +1,5 @@
 from smart_data import include
+from re import compile as re_compile, search as re_search
 
 expected = {
     'foo': 1.1,
@@ -70,14 +71,14 @@ def test_different_values():
 
 # Try to test structures with objects:
 class Foo:
-    def __init__(self, bar):
-        self.bar = bar
+    def __init__(self, foo):
+        self.foo = foo
 
     def __str__(self):
-        return str(self.bar)
+        return str(self.foo)
 
     def __eq__(self, other):
-        if self.bar == other.bar:
+        if self.foo == other.foo:
             return True
         else:
             return False
@@ -107,6 +108,104 @@ def test_different_objects():
         'bar': []
     }
     assert include(got_with_obj, expected_with_obj) == ['/foo/<2 vs 1>']
+
+
+def test_matching_regex():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': "2021-03-05 18:42:42",
+    }
+    assert include(got_with_obj, expected_with_obj) == []
+
+
+def test_not_matching_regex():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': "20-03-05",
+    }
+    assert include(got_with_obj, expected_with_obj) == ["/created/<20-03-05 not matched to regex re.compile('^\\\\d{4}-\\\\d\\\\d-\\\\d\\\\d$')>"]
+
+
+def test_not_matching_regex_diff_types():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': ["2021-03-05"],
+    }
+    assert include(got_with_obj, expected_with_obj) == ["/created/<['2021-03-05'] not matched to regex re.compile('^\\\\d{4}-\\\\d\\\\d-\\\\d\\\\d$')>"]
+
+
+def test_not_matching_regex_with_class():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': Foo("20-03-05"),
+    }
+    assert include(got_with_obj, expected_with_obj) == ["/created/<20-03-05 not matched to regex re.compile('^\\\\d{4}-\\\\d\\\\d-\\\\d\\\\d$')>"]
+
+
+def test_matching_regex_with_class():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': Foo("2021-03-05"),
+    }
+    assert include(got_with_obj, expected_with_obj) == []
+
+
+# Class without __eq__ and __str__ methods.
+class Bar:
+    def __init__(self, bar):
+        self.bar = bar
+
+
+def test_not_matching_regex_with_class_without_str_and_eq():
+    expected_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': re_compile(r"^\d{4}-\d\d-\d\d$"),
+    }
+
+    got_with_obj = {
+        'foo': Foo(1),
+        'bar': [],
+        'created': Bar("2021-03-05"),
+    }
+
+    result = include(got_with_obj, expected_with_obj)
+    assert len(result) == 1 and re_search(r"Bar object at", result[0])
 
 
 # pytest -vv
