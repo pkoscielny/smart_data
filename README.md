@@ -1,8 +1,8 @@
 # SMART DATA
 
-SMART DATA is a package to make your live easier. For example you want to test many JSON (or any other) results from some API in Python.
-There are plenty of great Python packages to find a differences between two complex structres but sometimes you need omit some their parts.
-This package help you to write this kind of code easier.
+SMART DATA is a package to make your life easier. For example you want to test many JSON (or any other) results from some API in Python. 
+There are plenty of great Python packages to find differences between two complex structres but sometimes you need to omit some of their parts. 
+This package will help you to write this kind of code easier.
 
 ## Requirements
 
@@ -22,11 +22,11 @@ pip install smart_data
 * list_diff - list with differences, e.g. 
   `['/attributes/temperature/<20.1 vs 22.2>']`
 
-Try to check if 'expected' structure includes 'got' structure. Any additional keys from 'got' will be igroned.
+Try to check if `expected` structure includes `got` structure. Any additional keys from `got` will be igroned.
 This situation can be expected if you don't want to check some parts of complex structure (e.g. in tests).
 
-The structures should contain dictionaries, lists, objects, simple types or any comparable structures (`__str__` and `__eq__` implementation).
-Additionally 'expected' can be or can contains compiled regular expression (re package) to check e.g. if you don't want mocking datetime objects.
+The structures should contain dictionaries, lists, objects, simple types or any comparable structures (`__str__` and `__eq__` implementation). 
+Additionally `expected` can be or can contain compiled regular expression (re package) to check e.g. if you don't want to mock datetime objects.
 
 ## Example of usage
 
@@ -64,9 +64,9 @@ def test_add_new(self, client):
         assert re_datetime.search(res_json['data']['attributes']['created'])
 
 ```
-You need write buch of asserts for many items in result structure. Many lines of code. If bigger structure then more code.
+You need to write a bunch of asserts for many items in result structure. Many lines of code. The bigger structure the more code.
 
-Now you can write it in another way using smart_data package:
+Now you can write it other way using smart_data package:
 ```
 from smart_data import include
 from re import compile
@@ -96,9 +96,9 @@ def test_add_new(self, client):
         res_json = res.get_json()
         assert include(got=res_json['data'], expected=payload) == []
 ```
-This is simple example with really small amount of data to test. For more complex structure the benefit is higher. 
+This is a simple example with a really small amount of data to test. For more complex structures the benefit is higher.
 
-Next benefit is readable output from broken assert during tests. For example:
+The next benefit is readable output from broken assert during tests. For example:
 ```
     def test_foo():
         expected = {
@@ -123,4 +123,4 @@ E         + ['/bar/1/baz/<2 vs 22>']
 tests/test_include.py:38: AssertionError
 ```
 
-
+Enjoy!
