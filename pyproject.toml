@@ -4,7 +4,6 @@ repository = "https://github.com/pkoscielny/smart_data"
 
 [build-system]
 requires = [
-    "re",
     "setuptools>=53.1.0",
     "wheel",
     "pytest",
